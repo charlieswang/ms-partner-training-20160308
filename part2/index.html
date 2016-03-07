@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<title>LotteryReport</title>
+
+<script src="index_files/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="index_files/bootstrap-3.3.1/css/readable.min.css" rel="stylesheet" />
+<script src="index_files/bootstrap-3.3.1/js/bootstrap.min.js"></script>
+<script src="index_files/bootstrap-3.3.1/shim/html5shiv.min.js"></script>
+<script src="index_files/bootstrap-3.3.1/shim/respond.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="index_files/highlight/default.css"
+      type="text/css" />
+<script src="index_files/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img { 
+  max-width:100%; 
+  height: auto; 
+}
+</style>
+<div class="container-fluid main-container">
+
+
+<div id="header">
+<h1 class="title">LotteryReport</h1>
+<h4 class="author"><em>Chih-Ping Chao</em></h4>
+<address class="author_afil">
+木刻思股份有限公司<br><a class="author_email" href="mailto:#"><a href="mailto:course@agilearning.io">course@agilearning.io</a>, <a href="mailto:george@data-sci.info">george@data-sci.info</a></a>
+</address>
+<h4 class="date"><em>March 8, 2016</em></h4>
+</div>
+
+
+<hr />
+<div id="mini-example-to-overview-etl-viz" class="section level1">
+<h1>1 Mini example to overview ETL + Viz</h1>
+<ul>
+<li><h3 id="fist-thing-check-your-environment">Fist Thing check your environment</h3></li>
+</ul>
+<pre class="r"><code>library(datasets);library(dplyr);library(ggplot2);library(devtools);library(reshape2)
+getwd()</code></pre>
+<pre><code>## [1] &quot;/home/gg/works/MSPartnerPratice/ms-partner-training-20160308/part2&quot;</code></pre>
+<pre class="r"><code>setwd(&quot;~/works/MSPartnerPratice/ms-partner-training-20160308&quot;)
+getwd()
+load(&quot;~/works/MSPartnerPratice/ms-partner-training-20160308/data/lottoryHistDf.RData&quot;)</code></pre>
+<pre class="r"><code>dir()</code></pre>
+<pre><code>## [1] &quot;index_cache&quot;          &quot;index.Rmd&quot;            &quot;Viz_Report_Lottery.R&quot;</code></pre>
+<pre class="r"><code>## load Data ##
+load(&quot;~/works/MSPartnerPratice/ms-partner-training-20160308/data/lottoryHistDf.RData&quot;)
+# View(lot)
+
+## choosing what you want ##
+lot &lt;- lottoryHistDf %&gt;% select(-c(monthDay, YN, TN, id))</code></pre>
+<hr />
+<div id="ggplot-usage" class="section level2">
+<h2>ggplot Usage</h2>
+<ul>
+<li>qplot() - for quick plots</li>
+</ul>
+<blockquote>
+<p>qplot(x, y, data=, color=, shape=, size=, alpha=, <br> 　　　geom=, method=, formula=, facets=, <br> 　　　xlim=, ylim= xlab=, ylab=, main=, sub=)</p>
+</blockquote>
+<ul>
+<li>ggplot() - for fine, granular control of everything
+<ul>
+<li>dataframe, aes()</li>
+<li>multi-layers</li>
+<li>geom_<code>xxx</code>(): Geometric objects that define the basic “shape” of the elements on the plot
+<ul>
+<li><a href="http://docs.ggplot2.org/current/">ggplot online help topics</a></li>
+</ul></li>
+</ul></li>
+</ul>
+<blockquote>
+<p>ggplot(data = , aes( x = , y = ), fill = , colour = ) + <br> 　　　　geom_() + <br> 　　　　theme_() + <br> 　　　　coord_() + facet_() + stat_ () + … <br></p>
+</blockquote>
+<pre class="r"><code># list all geom
+ls(pattern = &#39;^geom_&#39;, env = as.environment(&#39;package:ggplot2&#39;))</code></pre>
+<pre><code>##  [1] &quot;geom_abline&quot;     &quot;geom_area&quot;       &quot;geom_bar&quot;       
+##  [4] &quot;geom_bin2d&quot;      &quot;geom_blank&quot;      &quot;geom_boxplot&quot;   
+##  [7] &quot;geom_contour&quot;    &quot;geom_count&quot;      &quot;geom_crossbar&quot;  
+## [10] &quot;geom_curve&quot;      &quot;geom_density&quot;    &quot;geom_density2d&quot; 
+## [13] &quot;geom_density_2d&quot; &quot;geom_dotplot&quot;    &quot;geom_errorbar&quot;  
+## [16] &quot;geom_errorbarh&quot;  &quot;geom_freqpoly&quot;   &quot;geom_hex&quot;       
+## [19] &quot;geom_histogram&quot;  &quot;geom_hline&quot;      &quot;geom_jitter&quot;    
+## [22] &quot;geom_label&quot;      &quot;geom_line&quot;       &quot;geom_linerange&quot; 
+## [25] &quot;geom_map&quot;        &quot;geom_path&quot;       &quot;geom_point&quot;     
+## [28] &quot;geom_pointrange&quot; &quot;geom_polygon&quot;    &quot;geom_qq&quot;        
+## [31] &quot;geom_quantile&quot;   &quot;geom_raster&quot;     &quot;geom_rect&quot;      
+## [34] &quot;geom_ribbon&quot;     &quot;geom_rug&quot;        &quot;geom_segment&quot;   
+## [37] &quot;geom_smooth&quot;     &quot;geom_spoke&quot;      &quot;geom_step&quot;      
+## [40] &quot;geom_text&quot;       &quot;geom_tile&quot;       &quot;geom_violin&quot;    
+## [43] &quot;geom_vline&quot;</code></pre>
+<pre class="r"><code>ls(pattern = &#39;^stat_&#39;, env = as.environment(&#39;package:ggplot2&#39;))</code></pre>
+<pre><code>##  [1] &quot;stat_bin&quot;         &quot;stat_bin2d&quot;       &quot;stat_bin_2d&quot;     
+##  [4] &quot;stat_binhex&quot;      &quot;stat_bin_hex&quot;     &quot;stat_boxplot&quot;    
+##  [7] &quot;stat_contour&quot;     &quot;stat_count&quot;       &quot;stat_density&quot;    
+## [10] &quot;stat_density2d&quot;   &quot;stat_density_2d&quot;  &quot;stat_ecdf&quot;       
+## [13] &quot;stat_ellipse&quot;     &quot;stat_function&quot;    &quot;stat_identity&quot;   
+## [16] &quot;stat_qq&quot;          &quot;stat_quantile&quot;    &quot;stat_smooth&quot;     
+## [19] &quot;stat_spoke&quot;       &quot;stat_sum&quot;         &quot;stat_summary&quot;    
+## [22] &quot;stat_summary2d&quot;   &quot;stat_summary_2d&quot;  &quot;stat_summary_bin&quot;
+## [25] &quot;stat_summary_hex&quot; &quot;stat_unique&quot;      &quot;stat_ydensity&quot;</code></pre>
+<!-- end of list -->
+<hr />
+</div>
+</div>
+<div id="eda-from-data-visualization" class="section level1">
+<h1>EDA from Data Visualization</h1>
+<pre class="r"><code>### 2016 ###
+lot %&gt;% filter(year ==&quot;2016&quot;) %&gt;% 
+  melt(id.vars = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;)) %&gt;% 
+  filter( variable != &quot;s&quot;) %&gt;% group_by(year, value) %&gt;% 
+  summarise(count = n()) %&gt;% ggplot(aes(x = value,y = count)) + geom_bar(stat = &quot;identity&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>### 2015 ####
+lot %&gt;% filter(year ==&quot;2015&quot;) %&gt;% 
+  melt(id.vars = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;)) %&gt;% 
+  filter( variable != &quot;s&quot;) %&gt;% group_by(year, value) %&gt;% 
+  summarise(count = n()) %&gt;% ggplot(aes(x = value,y = count)) + geom_bar(stat = &quot;identity&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-6-2.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>## try choosing 2015 , get range ##
+lot %&gt;% filter(year ==&quot;2015&quot;) %&gt;% 
+  melt(id.vars = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;)) %&gt;% 
+  filter( variable != &quot;s&quot;) %&gt;% group_by(year, value) %&gt;% 
+  summarise(count = n()) %&gt;% filter(count == max(count) | count == min(count))</code></pre>
+<pre><code>## Source: local data frame [3 x 3]
+## Groups: year [1]
+## 
+##    year value count
+##   (chr) (chr) (int)
+## 1  2015    14     8
+## 2  2015    29    22
+## 3  2015    34     8</code></pre>
+<pre class="r"><code>## exercise ##
+lot %&gt;% filter(year !=&quot;2016&quot;) %&gt;% 
+  melt(id.vars = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;)) %&gt;% 
+  filter( variable != &quot;s&quot;) %&gt;% group_by(year, value) %&gt;% 
+  summarise(count = n()) %&gt;% select(year, count) %&gt;% group_by(year) %&gt;% 
+  summarise(min = min(count), max = max(count)) %&gt;% 
+  View()
+
+
+#### Q: believe pattern ? ####
+lot.long &lt;- lot %&gt;% melt(id.vars = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;))
+lot.long %&gt;% filter(variable != &quot;s&quot;) %&gt;% group_by(year, value) %&gt;% 
+  summarise(count = n()) %&gt;% arrange(desc(count))  %&gt;% 
+  select(year, value) %&gt;% group_by(year) %&gt;% summarise(count = n()) %&gt;% 
+  View()</code></pre>
+</div>
+<div id="r-markdown-features" class="section level1">
+<h1>R Markdown Features</h1>
+<div class="section level3">
+<h3>再次題列幾項好處</h3>
+<ul>
+<li>製作reproducible的報告、投影片: <code>document</code> 、 <code>slides</code></li>
+<li>想寫數學式子好展現自己的專業 <span class="math inline">\(e=mc^2\)</span>: <code>mathjax</code></li>
+<li>只有一份source code，不需要額外複製圖片到報告中: <code>.rmd</code></li>
+<li>增加資料分析演算法的可讀性: <code>code and text</code></li>
+<li>HTML的報告和投影片的格式方便瀏覽: <code>html</code></li>
+<li>IDE? RStudio提供支援: <code>Knit Button</code></li>
+</ul>
+</div>
+<div id="basic-syntax-format" class="section level2">
+<h2>basic syntax (format)</h2>
+<ul>
+<li><h1>#最大標題</h1></li>
+<li><h2>##大標題</h2></li>
+<li><h3>###標題</h3></li>
+<li><h5>####小標題</h5></li>
+<li><p>分段落：兩個斷行</p></li>
+<li><em>斜體</em>： <code>*斜體字*</code>, <strong>粗體</strong>: <code>**粗體字**</code></li>
+<li><code>程式碼</code> 寫在行內： ` `</li>
+<li><p>區段程式碼(chunk code)： <img src="img/chunk_code.png" alt="" /></p></li>
+</ul>
+</div>
+<div id="overview-with-rsudio" class="section level2">
+<h2>Overview with RSudio</h2>
+<ul>
+<li>YAML Metadata （RStudio範例）</li>
+<li>Markdown （RStudio範例）</li>
+<li>Makrdown Quick Reference<br />
+</li>
+<li><a href="https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf?version=0.99.764&amp;mode=desktop">Markdown Cheatsheet</a><br />
+</li>
+<li><a href="https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf?version=0.99.764&amp;mode=desktop">Markdown Reference</a><br />
+</li>
+<li>R Code Chunk</li>
+</ul>
+</div>
+<div id="inline-r-code-chunk-and-equations" class="section level2">
+<h2>Inline R Code chunk and Equations</h2>
+<ul>
+<li>利用 `r` 在markdown中插入R程式</li>
+<li>插入 LaTeX 公式的方法：
+<ul>
+<li>行內<code>$ equation $</code><br />
+</li>
+<li>段落 <code>$$ equation $$</code></li>
+</ul></li>
+<li><img src="img/equation.png" alt="" /></li>
+<li>這是木刻思推出的第 3門課程</li>
+<li>熵指標的公式為 <span class="math inline">\(-\sum{p_i \log{p_i}}\)</span>，表示系統的亂度</li>
+</ul>
+<div id="-chunk-chunk-option" class="section level4">
+<h4>[練習] chunk &amp; chunk option</h4>
+<ul>
+<li>觀察將第一個 R Chunk中的 summary(cars) 改成 head(cars)</li>
+<li>觀察 echo = TRUE -&gt; echo = FALSE 結果差異？</li>
+<li>觀察 eval = TRUE -&gt; eval = FALSE 結果差異？</li>
+<li>觀察在 chunk option 多加入 results = ‘asis’ 結果差異？</li>
+<li>觀察 head(cars) 改成 knitr::kable(head(cars))</li>
+</ul>
+<pre class="r"><code>summary(cars)</code></pre>
+<pre><code>##      speed           dist       
+##  Min.   : 4.0   Min.   :  2.00  
+##  1st Qu.:12.0   1st Qu.: 26.00  
+##  Median :15.0   Median : 36.00  
+##  Mean   :15.4   Mean   : 42.98  
+##  3rd Qu.:19.0   3rd Qu.: 56.00  
+##  Max.   :25.0   Max.   :120.00</code></pre>
+<pre class="r"><code>plot(cars)</code></pre>
+<p><img src="index_files/figure-html/codeChunkEx1-1.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>head(cars)</code></pre>
+<pre class="r"><code>knitr::kable(head(cars))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">speed</th>
+<th align="right">dist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">4</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">10</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="right">7</td>
+<td align="right">22</td>
+</tr>
+<tr class="odd">
+<td align="right">8</td>
+<td align="right">16</td>
+</tr>
+<tr class="even">
+<td align="right">9</td>
+<td align="right">10</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="basic-chunk-options" class="section level4">
+<h4>Basic Chunk Options</h4>
+<ul>
+<li><code>echo</code>(TRUE): whether to include R source code in the output file<br />
+</li>
+<li><code>eval</code>(TRUE): whether to evaluate the code chunk<br />
+</li>
+<li><code>message</code>(TRUE): whether to preserve messages emitted by message()<br />
+</li>
+<li><code>include</code>(TRUE): whether to be written into the output document, but the code is still evaluated and plot files are generated<br />
+</li>
+<li><code>warning</code>(TRUE): whether to preserve warnings in the output</li>
+<li><code>comment</code>(“##”): set to comment notation</li>
+<li><code>results</code>(‘hide’,‘asis’): hide output ; asis treats the output of your R code as literal Markdown (when using like kable function)</li>
+</ul>
+<p>Set global chunk options at code chunks header:</p>
+<pre class="r"><code>knitr::opts_chunk$set(comment=&quot;&quot;, message=FALSE, warning=FALSE, fig.width=12, fig.height=8.5)
+library(datasets)
+library(dplyr)
+library(ggplot2)
+library(devtools)
+library(reshape2)
+library(rmarkdown)
+library(knitr)
+library(plotly)</code></pre>
+</div>
+</div>
+<div id="rendering" class="section level2">
+<h2>3.4 Rendering</h2>
+<ul>
+<li>RStudio: “Knit” command (Ctrl+Shift+K)</li>
+<li>Command line: rmarkdown::render function</li>
+</ul>
+<pre class="r"><code>rmarkdown::render(&quot;index.Rmd&quot;)</code></pre>
+<div class="section level4">
+<h4>[練習]</h4>
+<ul>
+<li>輸出圖片 <img src="https://assets.onestore.ms/cdnfiles/onestorerolling-1602-26000/shell/v3/images/logo/microsoft.png" alt="" /></li>
+</ul>
+</div>
+<div id="reference" class="section level3">
+<h3>Reference</h3>
+<ul>
+<li><a href="https://www.coursera.org/course/repdata">Reproducible Research</a></li>
+<li><a href="http://shiny.rstudio.com/gallery/">Shiny Gallery</a></li>
+<li><a href="http://shiny.rstudio.com/articles/">Shiny Atricles</a></li>
+</ul>
+<!-- end of list -->
+<hr />
+</div>
+</div>
+<div id="r-markdown" class="section level2">
+<h2>R Markdown</h2>
+<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
+<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+<pre class="r"><code>summary(cars)</code></pre>
+<pre><code>##      speed           dist       
+##  Min.   : 4.0   Min.   :  2.00  
+##  1st Qu.:12.0   1st Qu.: 26.00  
+##  Median :15.0   Median : 36.00  
+##  Mean   :15.4   Mean   : 42.98  
+##  3rd Qu.:19.0   3rd Qu.: 56.00  
+##  Max.   :25.0   Max.   :120.00</code></pre>
+</div>
+<div id="including-plots" class="section level2">
+<h2>Including Plots</h2>
+<p>You can also embed plots, for example:</p>
+<p><img src="index_files/figure-html/pressure-1.png" title="" alt="" width="672" /></p>
+<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
