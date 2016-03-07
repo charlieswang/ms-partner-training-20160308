@@ -1,0 +1,260 @@
+---
+title: "LotteryReport"
+author: 
+  name: "Chih-Ping Chao"
+  affiliation: 木刻思股份有限公司
+  email: "course@agilearning.io, george@data-sci.info"
+  website: "https://data-sci.info"
+date: "March 8, 2016"
+output: 
+  html_document:
+    self_contained: no 
+    theme: readable
+---
+```{r include=FALSE,cache=TRUE}
+knitr::opts_chunk$set(comment="", message=FALSE, warning=FALSE, fig.width=12, fig.height=8.5)
+library(datasets)
+library(dplyr)
+library(ggplot2)
+library(devtools)
+library(reshape2)
+library(rmarkdown)
+library(knitr)
+library(plotly)
+library(magrittr)
+```
+
+---
+
+# 1 Mini example to overview ETL + Viz
+
+- ### Fist Thing check your environment
+
+```{r}
+library(datasets);library(dplyr);library(ggplot2);library(devtools);library(reshape2)
+getwd()
+```
+```{r, eval=FALSE}
+setwd("~/works/MSPartnerPratice/ms-partner-training-20160308")
+getwd()
+load("~/works/MSPartnerPratice/ms-partner-training-20160308/data/lottoryHistDf.RData")
+```
+```{r}
+dir()
+## load Data ##
+load("~/works/MSPartnerPratice/ms-partner-training-20160308/data/lottoryHistDf.RData")
+# View(lot)
+
+## choosing what you want ##
+lot <- lottoryHistDf %>% select(-c(monthDay, YN, TN, id))
+```
+
+---
+
+## ggplot Usage 
+
+- qplot() - for quick plots
+
+> qplot(x, y, data=, color=, shape=, size=, alpha=, <br>
+  　　　geom=, method=, formula=, facets=, <br>
+  　　　xlim=, ylim= xlab=, ylab=, main=, sub=)
+
+- ggplot() - for fine, granular control of everything
+    - dataframe, aes()
+    - multi-layers
+    - geom_`xxx`(): Geometric objects that define the basic "shape" of the elements on the plot
+        - [ggplot online help topics](http://docs.ggplot2.org/current/)
+
+> ggplot(data = , aes( x = , y = ), fill = , colour = ) + <br>
+  　　　　geom_() + <br>
+  　　　　theme_() + <br> 
+  　　　　coord_() + facet_() + stat_ () + ... <br>
+
+
+```{r}
+# list all geom
+ls(pattern = '^geom_', env = as.environment('package:ggplot2'))
+ls(pattern = '^stat_', env = as.environment('package:ggplot2'))
+```
+
+<!-- end of list -->
+
+---
+
+# EDA from Data Visualization
+
+```{r}
+### 2016 ###
+lot %>% filter(year =="2016") %>% 
+  melt(id.vars = c("year", "month", "day")) %>% 
+  filter( variable != "s") %>% group_by(year, value) %>% 
+  summarise(count = n()) %>% ggplot(aes(x = value,y = count)) + geom_bar(stat = "identity")
+
+### 2015 ####
+lot %>% filter(year =="2015") %>% 
+  melt(id.vars = c("year", "month", "day")) %>% 
+  filter( variable != "s") %>% group_by(year, value) %>% 
+  summarise(count = n()) %>% ggplot(aes(x = value,y = count)) + geom_bar(stat = "identity")
+
+## try choosing 2015 , get range ##
+lot %>% filter(year =="2015") %>% 
+  melt(id.vars = c("year", "month", "day")) %>% 
+  filter( variable != "s") %>% group_by(year, value) %>% 
+  summarise(count = n()) %>% filter(count == max(count) | count == min(count))
+
+## exercise ##
+lot %>% filter(year !="2016") %>% 
+  melt(id.vars = c("year", "month", "day")) %>% 
+  filter( variable != "s") %>% group_by(year, value) %>% 
+  summarise(count = n()) %>% select(year, count) %>% group_by(year) %>% 
+  summarise(min = min(count), max = max(count)) %>% 
+  View()
+
+
+#### Q: believe pattern ? ####
+lot.long <- lot %>% melt(id.vars = c("year", "month", "day"))
+lot.long %>% filter(variable != "s") %>% group_by(year, value) %>% 
+  summarise(count = n()) %>% arrange(desc(count))  %>% 
+  select(year, value) %>% group_by(year) %>% summarise(count = n()) %>% 
+  View()
+
+```
+
+
+# R Markdown Features
+
+### 再次題列幾項好處
+
+- 製作reproducible的報告、投影片: `document` 、 `slides`
+- 想寫數學式子好展現自己的專業 $e=mc^2$:  `mathjax`
+- 只有一份source code，不需要額外複製圖片到報告中: `.rmd`
+- 增加資料分析演算法的可讀性: `code and text`
+- HTML的報告和投影片的格式方便瀏覽: `html`
+- IDE? RStudio提供支援: `Knit Button`
+
+## basic syntax (format)
+
+- # #最大標題
+- ## ##大標題
+- ### ###標題
+- ##### ####小標題
+- 分段落：兩個斷行
+
+
+- *斜體*： `*斜體字*`, **粗體**: `**粗體字**`
+- `程式碼` 寫在行內：  ` `
+-  區段程式碼(chunk code)： ![](img/chunk_code.png)
+
+
+## Overview with RSudio
+
+- YAML Metadata （RStudio範例）
+- Markdown （RStudio範例）
+  + Makrdown Quick Reference  
+  + [Markdown Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf?version=0.99.764&mode=desktop)  
+  + [Markdown Reference](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf?version=0.99.764&mode=desktop)  
+- R Code Chunk  
+
+## Inline R Code chunk and Equations
+
+- 利用 \`r\` 在markdown中插入R程式
+- 插入 LaTeX 公式的方法：   
+    * 行內`$ equation $`   
+    * 段落 `$$ equation $$`  
+
+- ![](img/equation.png)
+- 這是木刻思推出的第 `r 2+1`門課程
+- 熵指標的公式為 $-\sum{p_i \log{p_i}}$，表示系統的亂度
+
+#### [練習] chunk & chunk option 
+  + 觀察將第一個 R Chunk中的 summary(cars) 改成 head(cars)
+  + 觀察 echo = TRUE -> echo = FALSE 結果差異？
+  + 觀察 eval = TRUE -> eval = FALSE 結果差異？
+  + 觀察在 chunk option 多加入 results = 'asis' 結果差異？
+  + 觀察 head(cars) 改成 knitr::kable(head(cars))
+
+```{r codeChunkEx1, echo = TRUE , eval=TRUE}
+summary(cars)
+plot(cars)
+```
+
+```{r codeChunkEx2, echo = TRUE, eval=FALSE}
+head(cars)
+```
+
+```{r codeChunkEx3, echo = TRUE, eval=TRUE, results="asis"}
+knitr::kable(head(cars))
+```
+
+#### Basic Chunk Options
+
+- `echo`(TRUE): whether to include R source code in the output file  
+- `eval`(TRUE): whether to evaluate the code chunk  
+- `message`(TRUE): whether to preserve messages emitted by message()  
+- `include`(TRUE): whether to be written into the output document, but the code is still evaluated and plot files are generated  
+- `warning`(TRUE): whether to preserve warnings in the output 
+- `comment`("##"): set to comment notation 
+- `results`('hide','asis'): hide output ; asis treats the output of your R code as literal Markdown (when using like kable function)
+
+Set global chunk options at code chunks header:
+
+```{r opt_chunk, eval=FALSE}
+knitr::opts_chunk$set(comment="", message=FALSE, warning=FALSE, fig.width=12, fig.height=8.5)
+library(datasets)
+library(dplyr)
+library(ggplot2)
+library(devtools)
+library(reshape2)
+library(rmarkdown)
+library(knitr)
+library(plotly)
+```
+
+## 3.4 Rendering 
+
+- RStudio: "Knit" command (Ctrl+Shift+K)
+- Command line: rmarkdown::render function
+```{r eval=FALSE, echo=TRUE}
+rmarkdown::render("index.Rmd")
+```
+
+#### [練習]
+  + 輸出圖片 ![](https://assets.onestore.ms/cdnfiles/onestorerolling-1602-26000/shell/v3/images/logo/microsoft.png)
+
+  
+### Reference
+
+- [Reproducible Research](https://www.coursera.org/course/repdata)
+- [Shiny Gallery](http://shiny.rstudio.com/gallery/)
+- [Shiny Atricles](http://shiny.rstudio.com/articles/)
+
+<!-- end of list -->
+
+
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
