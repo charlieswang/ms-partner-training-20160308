@@ -18,7 +18,7 @@ lot %>% filter(year =="2016") %>%
   summarise(count = n()) %>% ggplot(aes(x = value,y = count)) + geom_bar(stat = "identity")
 
 ### 2015 ####
-lot %>% filter(year =="2015") %>% 
+p <- lot %>% filter(year =="2015") %>% 
   melt(id.vars = c("year", "month", "day")) %>% 
   filter( variable != "s") %>% group_by(year, value) %>% 
   summarise(count = n()) %>% ggplot(aes(x = value,y = count)) + geom_bar(stat = "identity")
@@ -46,8 +46,8 @@ lot.long %>% filter(variable != "s") %>% group_by(year, value) %>%
   View()
 
 
-
-
+library(plotly)
+plot_ly(p)
 
 
 
